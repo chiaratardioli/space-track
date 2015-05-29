@@ -34,7 +34,7 @@ This folder contains:
 ./download_cat_MAC.sh 1      # for MAC users
 ./download_cat_LINUX.sh 1    # for LINUX users
 ```
-and follow intructions. You need an account on space-track.org.
+and follow intructions. You need an account on [space-track.org](https://www.space-track.org).
 
 
 2. To download the satellite catalog (containing the physical parameters) from celestrak.com:
