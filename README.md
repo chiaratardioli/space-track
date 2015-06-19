@@ -16,13 +16,12 @@ This folder contains:
     - TLE2KEP.f90
     - SAT2TABLE.f90
     
-- 1 R markdown file 
-    - SatAnalysis.Rmd 
+- 1 R markdown file
+    - SatAnalysis.Rmd
     
     that run the analysis using R (it is assumed that the catalog have been downloaded).
     To compile this file, type `make html` in the terminal or use `Rstudio`. 
-    To download and install R look [here](http://www.r-project.org). And example of the output is 
-    contained in 'SatAnalysis.md'.
+    To download and install R look [here](http://www.r-project.org). See below.
     
 - 1 makefile
     - makefile: make clean
@@ -47,21 +46,24 @@ If it is not working, try deleting the file `cookies.txt`.
 ## Satellite Analysis outputs
 
 The `SatAnalysis.Rmd` processes the orbits for the two calatogues previously downloaded.
-It runs on R (knitr) and produces two output files:
+It runs on R (knitr) and produces three output files:
+
+ - `SatAnalysis.md`: the output of R, visualize the catalogues and contains some plots.
+    An example of it is contained in this repository.
 
  - `orbitsat.txt`: merge the two catalogues and contains the following fields:
-   		   - NORAD_ID
-		   - semimajor axis [km]
-		   - eccentricity
-		   - inclination [deg]
-		   - right ascension of the ascending node [deg]
-		   - argument of pericenter [deg]
-		   - mean anomaly [deg]
-		   - launch date [YY-MM-DD]
-		   - decay date [YY-MM-DD]
-		   - ratio-cross-section (RCS)
+    - NORAD_ID
+    - semimajor axis [km]
+    - eccentricity
+    - inclination [deg]
+    - right ascension of the ascending node [deg]
+    - argument of pericenter [deg]
+    - mean anomaly [deg]
+    - launch date [YY-MM-DD]
+    - decay date [YY-MM-DD]
+    - ratio-cross-section (RCS)
 
  - `heo_sat.txt`: a list of orbits that satisfy the following conditions:
-   		  - eccentrycity > 0.3
-		  - perigee < 6600 km
-		  - ratio-cross-section > 1.0
+    - eccentrycity > 0.3
+    - perigee < 6600 km
+    - ratio-cross-section > 1.0
