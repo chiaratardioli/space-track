@@ -34,7 +34,8 @@ This folder contains:
 ./download_cat_MAC.sh 1      # for MAC users
 ./download_cat_LINUX.sh 1    # for LINUX users
 ```
-and follow intructions. You need an account on [space-track.org](https://www.space-track.org).
+and follow intructions. You need an account on [space-track.org](https://www.space-track.org). 
+If it is not working, try deleting the file `cookies.txt`.
 
 
 2. To download the satellite catalog (containing the physical parameters) from celestrak.com:
@@ -42,3 +43,25 @@ and follow intructions. You need an account on [space-track.org](https://www.spa
 ./download_cat_MAC.sh 2      # for MAC users
 ./download_cat_LINUX.sh 2    # for LINUX users
 ```
+
+## Satellite Analysis outputs
+
+The `SatAnalysis.Rmd` processes the orbits for the two calatogues previously downloaded.
+It runs on R (knitr) and produces two output files:
+
+ - `orbitsat.txt`: merge the two catalogues and contains the following fields:
+   		   - NORAD_ID
+		   - semimajor axis [km]
+		   - eccentricity
+		   - inclination [deg]
+		   - right ascension of the ascending node [deg]
+		   - argument of pericenter [deg]
+		   - mean anomaly [deg]
+		   - launch date [YY-MM-DD]
+		   - decay date [YY-MM-DD]
+		   - ratio-cross-section (RCS)
+
+ - `heo_sat.txt`: a list of orbits that satisfy the following conditions:
+   		  - eccentrycity > 0.3
+		  - perigee < 6600 km
+		  - ratio-cross-section > 1.0

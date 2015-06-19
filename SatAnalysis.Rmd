@@ -216,7 +216,7 @@ We are intersted at big satellite in HEO. So at the end, there are `r sum(subcat
 
 - eccentrycity > 0.3
 - perigee < 6600 km
-- retio cross section > 1.0
+- ratio cross section > 1.0
 
 ```{r fileterd_cat_bis}
 filterd_cat <- filter(subcat_ecc,RCS>1 )
