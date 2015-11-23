@@ -1,0 +1,71 @@
+Basic Description of the Two Line Element (TLE) Format.
+
+ISS (ZARYA)
+1 25544U 98067A   04236.56031392  .00020137  00000-0  16538-3 0  9993
+2 25544  51.6335 344.7760 0007976 126.2523 325.9359 15.70406856328903
+----------------------------------------------------------------------
+1234567890123456789012345678901234567890123456789012345678901234567890   reference number line
+         1         2         3         4         5         6         7
+
+Line 0
+Columns	Example	Description
+1-24	ISS (ZARYA)	The common name for the object based on information from the Satellite Catalog.
+Line 1
+Columns	Example	Description
+1	1	Line Number
+3-7	25544	Satellite Catalog Number
+8	U	Elset Classification
+10-17	98067A	International Designator
+19-32	04236.56031392	      Element Set Epoch (UTC) *Note: spaces are acceptable in columns 21 & 22
+34-43	.00020137	      1st Derivative of the Mean Motion with respect to Time
+45-52	00000-0		      2nd Derivative of the Mean Motion with respect to Time (decimal point assumed)
+54-61	16538-3		      B* Drag Term
+63	0		      Element Set Type
+65-68	999		      Element Number
+69	3		      Checksum
+Line 2
+Columns	Example	Description
+1	2	Line Number
+3-7	25544	Satellite Catalog Number
+9-16	51.6335	Orbit Inclination (degrees)
+18-25	344.7760      Right Ascension of Ascending Node (degrees)
+27-33	0007976	      Eccentricity (decimal point assumed)
+35-42	126.2523      Argument of Perigee (degrees)
+44-51	325.9359      Mean Anomaly (degrees)
+53-63	15.70406856   Mean Motion (revolutions/day)
+64-68	32890	      Revolution Number at Epoch
+69	3	      Checksum
+
+More Information
+Satellite Catalog Number
+The catalog number assigned to the object by the US Air Force. The numbers are assigned sequentially
+as objects are cataloged. Object numbers less then 10000 are always aligned to the right, and padded
+with zeros or spaces to the left. 
+
+Classification
+The security classification of the element set. All objects on this site will have a classification of
+'U' (unclassified). 
+
+International Designator
+98067A
+
+This is another format for identifying an object.
+The first two characters designate the launch year of the object.
+The next 3 characters indicate the launch number, starting from the beginning of the year.
+This particular launch was the 67th launch of 1998.
+The remainder of the field (1 to 3 characters) indicates the piece of the launch. Piece 'A' is usually the payload.
+
+
+Element Set Epoch
+04236.56031392
+
+The first two digits ('04') indicate the year. Add 1900 for years >= 57, and 2000 for all others.
+The remainder of the field ('236.56031392') is the day of the year.
+Spaces or numbers are acceptable in day of the year. (e.g. '236' or '006' or ' 6').
+
+
+Checksum
+The checksum is the sum of all characters in the data line, modulo 10. In this formula, the following non-numeric
+characters are assigned the indicated values:
+Blanks, periods, letters, '+' signs -> 0
+'-' signs -> 1
