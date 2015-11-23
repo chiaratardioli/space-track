@@ -42,6 +42,12 @@ program TLE2KEP
   character(30) eccentricity
 
 
+!  character(7) satNumClass
+!  character(2) eltype,esponente
+!  character(30) designator,d2ndt,long_str
+!  integer base,esp,elnum
+1  double precision B_Drag
+
 
 !Open the TLE file and count the number of lines in the file
  nlines = 0
@@ -64,9 +70,16 @@ program TLE2KEP
 !Read the rows (1,2,3), (4,5,6) ... The third line is the important one
     read(10,*)
     read(10,*)
-    read(10,30,iostat=iend)line,satNum,inc,RAAN,eccentricity,argp,M,n,revol_number
-30 format(1i2,1i6,2f9.4,1a7,2f9.4,1f12.8,1i6) 
-   
+!    read(10,101,iostat=iend)line,satNumClass,designator,long_str,&
+!         & d2ndt,base,esponente,eltype,elnum
+
+    read(10,102,iostat=iend)line,satNum,inc,RAAN,eccentricity,argp,M,n,revol_number
+
+!Format the B_Drag
+!    read(esponente,*)esp
+!    B_Drag = base * 10.d0**esp
+!    write(*,*) B_Drag,base,esp,10.d0**esp
+
 !Compute the values sma, ecc, inc, ...
     eccentricity = '0.'//eccentricity
     read(eccentricity,*)ecc
@@ -74,10 +87,13 @@ program TLE2KEP
     sma = (mu/(n*n))**(1d0/3d0); ![m]
 
 !Write the orbital elements in a file
-    write(11,40)satNum,sma,ecc,inc,RAAN,argp,M
-40  format(1i8,2x,f14.4,5(1x,f14.8))
+    write(11,103)satNum,sma,ecc,inc,RAAN,argp,M !,B_Drag
 
  END DO
+!101 format(1i2,1a7,1a9,1a15,1a19,1i7,1a2,1a2,1i5)
+102 format(1i2,1i6,2f9.4,1a7,2f9.4,1f12.8,1i6) 
+103 format(1i8,2x,f14.4,5(1x,f14.8)) !,1f15.4)
+
  close(10)
  close(11)
 

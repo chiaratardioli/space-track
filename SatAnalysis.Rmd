@@ -47,8 +47,8 @@ ln -s tle_latest.txt file.txt
 
 Then, compile the fortran file `TLE2KEP.f90` (with gfortran, ifort, etc.) and run the executable to transform the 2 lines element catalog in a table format. The output is a file called `file_oe.fla`.
 ```{r engine='sh',convert_TLE_to_KEP}
-gfortran TLE2KEP.f90 -o TLE2KEP.x
-./TLE2KEP.x
+gfortran TLE2KEP.f90 -o TLE2KEP
+./TLE2KEP
 ```
 ```{r engine='sh',echo=FALSE,show_KEP}
 file_name=./file_oe.fla;
@@ -61,8 +61,8 @@ echo "Number of objects: $((NUMLIN-1))";
 
 To process `SATCAT.TXT` we need change the delimiter of the table (missing values are represented by empty strings and not all can be recognised by R). Compile the fortran code `SAT2TABLE.f90` and run the executable. It will also add an header. The output is a file called `satcat.fla`.
 ```{r engine='sh',SAT2TABLE}
-gfortran SAT2TABLE.f90 -o SAT2TABLE.x
-./SAT2TABLE.x
+gfortran SAT2TABLE.f90 -o SAT2TABLE
+./SAT2TABLE
 ```
 ```{r engine='sh',echo=FALSE,show_new_satcat}
 file_name=satcat.fla;
@@ -74,7 +74,7 @@ echo "Number of objects: $((NUMLIN-1))";
 
 Read the data assigning the right format and merge the two catalogues (here using R)
 ```{r read_data,cache=FALSE}
-tlecat <- tbl_df(read.table(file = "file_oe.fla", header = TRUE, dec = "." ))
+tlecat <- tbl_df(read.table(file = "file_oe.fla", header = TRUE, dec = "."))
 tlecat
 satcat <- tbl_df(read.table(file = "satcat.fla", header = TRUE, dec = ".", sep = "|",na.string=""))
 satcat$DECAY <- as.Date(satcat$DECAY)

@@ -1,0 +1,148 @@
+---
+output:
+  html_document:
+    keep_md: yes
+---
+
+Satellite Orbit and Decay Analysis
+======================================================
+
+## Synopsis
+The first list of TLE objects contains all the ones with ratio-cross section greater that 1.0.
+The second list are the ones given by the paper of Rossi et al. on the criticality index (CSI).
+
+```{r load_library,results="hide",echo=FALSE,message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+```
+
+## Raw data
+
+The catalog `tle_latest.txt` is taken form space-track.org:
+```{r engine='sh',echo=FALSE,show_tle}
+file_name=./tle_latest.txt;
+head -6 $file_name ;
+NUMLIN=$(cat $file_name | wc -l ); # no. of objects
+echo "====================================================================="
+echo "Number of objects: $((NUMLIN/3))  (no. of rwos: $NUMLIN )";
+```
+
+The catalog `satcat.txt` (containing the physical parameters) comes from celestrak.com:
+```{r engine='sh',echo=FALSE,show_satcat}
+file_name=./satcat.txt;
+head -3 $file_name;
+NUMLIN=$(cat $file_name | wc -l ); # no. of objects
+echo "====================================================================="
+echo "Number of objects: $NUMLIN";
+```
+
+An explanation from the variables can be found in the docs folder.
+
+Read file `top15`:
+```{r read-top15}
+top15 <- tbl_df(read.table(file = "top15", header = TRUE, dec = ".", sep="\t"))
+```
+
+### Processing Catalog 1
+To process `TLE_LATEST.TXT` into a table containing the Keplerian orbital elements, create a symbolic link or a copy of it and name it `file.fla`.
+```{r engine='sh',create_link}
+rm -f file.txt
+ln -s tle_latest.txt file.txt
+```
+
+Then, compile the fortran file `TLE2KEP.f90` (with gfortran, ifort, etc.) and run the executable to transform the 2 lines element catalog in a table format. The output is a file called `file_oe.fla`.
+```{r engine='sh',convert_TLE_to_KEP}
+gfortran TLE2KEP.f90 -o TLE2KEP
+./TLE2KEP
+```
+```{r engine='sh',echo=FALSE,show_KEP}
+file_name=./file_oe.fla;
+head -6 $file_name;
+NUMLIN=$(cat $file_name | wc -l ); # no. of objects
+echo "====================================================================="
+echo "Number of objects: $((NUMLIN-1))";
+```
+
+
+To process `SATCAT.TXT` we need change the delimiter of the table (missing values are represented by empty strings and not all can be recognised by R). Compile the fortran code `SAT2TABLE.f90` and run the executable. It will also add an header. The output is a file called `satcat.fla`.
+```{r engine='sh',SAT2TABLE}
+gfortran SAT2TABLE.f90 -o SAT2TABLE
+./SAT2TABLE
+```
+```{r engine='sh',echo=FALSE,show_new_satcat}
+file_name=satcat.fla;
+NUMLIN=$(cat $file_name | wc -l ); # no. of objects
+echo "====================================================================="
+echo "Number of objects: $((NUMLIN-1))";
+```
+
+Read the data assigning the right format and merge the two catalogues (here using R)
+```{r read_data,cache=FALSE}
+tlecat <- tbl_df(read.table(file = "file_oe.fla", header = TRUE, dec = "."))
+tlecat
+satcat <- tbl_df(read.table(file = "satcat.fla", header = TRUE, dec = ".", sep = "|",na.string=""))
+mergecat <- tbl_df(merge(tlecat,satcat,by=c("NORAD_ID")))
+```
+
+We are only interseted in a subset of the catalog:
+```{r merge_cat}
+subcat <- select(mergecat,NORAD_ID,sma_meter,ecc,inc_deg,RAAN_deg,argp_deg,M_deg,RCS)
+subcat
+```
+
+From these, we select the larger one with RCS>1:
+```{r larger-objects}
+earth_radius <- 6371
+larger <- filter(subcat,RCS>1,sma_meter<(2400+earth_radius)*1000) #,inc_deg<100)
+summary(larger)
+larger
+```
+
+
+## Plots
+
+```{r echo=FALSE,fig.height=5,sma_inc}
+cat <- data.frame(cbind(larger$sma_meter*(1-larger$ecc)/1000 - earth_radius,
+                        larger$sma_meter*(1+larger$ecc)/1000 - earth_radius,
+                        larger$inc_deg));
+names(cat) <- c("peri_km","apo_km","inc_deg");
+sc <- data.frame(cbind(top15$a_km*(1-top15$ecc) - earth_radius,
+                       top15$a_km*(1+top15$ecc) - earth_radius,
+                       top15$inc_deg));
+names(sc) <- c("peri_km","apo_km","inc_deg");
+
+with(cat, plot(inc_deg, peri_km, col = "blue", pch = 1))
+with(cat, points(inc_deg, apo_km, col = "red", pch = 1))
+with(sc, points(inc_deg, peri_km, col = "black", pch = 20))
+
+g <- ggplot( cat, aes( inc_deg, y = value, color = variable))
+g + geom_point( aes(y = peri_km, col="red",alpha=0.5) )  +
+    geom_point( aes(y = apo_km, col="blue",alpha=0.5) ) +
+    labs(x = "inclination [deg]") +
+    labs(y = "pericenter/apocenter altitude [km]")
+```
+
+## Save processed catalog
+
+We finish writing the catalog `top15` and `larger` into a file with the format need by the Conjunction Algorithm.
+```{r writefile}
+orbits1 <- top15[,2:3]
+names(orbits1) <- c("a_m","ecc")
+orbits1$a_m  <- orbits1$a_m*1000
+orbits1$inc  <- top15$inc_deg * pi/360
+orbits1$RAAN <- runif(nrow(orbits1),min=0,max=360) * pi/360
+orbits1$argp <- runif(nrow(orbits1),min=0,max=360) * pi/360
+orbits1$M    <- runif(nrow(orbits1),min=0,max=360) * pi/360
+
+orbits2      <- larger[,2:3]
+names(orbits2) <- c("a_m","ecc")
+orbits2$inc  <- larger$inc_deg * pi/360
+orbits2$RAAN <- larger$RAAN_deg * pi/360
+orbits2$argp <- larger$argp_deg * pi/360
+orbits2$M    <- larger$M_deg * pi/360
+
+orbit <- rbind(orbits1,orbits2)
+orbit <- cbind("",orbit)
+write.table(orbit, file = "orbit_test.txt", row.name = FALSE, sep = "\t")
+```

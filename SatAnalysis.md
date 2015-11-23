@@ -83,14 +83,8 @@ ln -s tle_latest.txt file.txt
 Then, compile the fortran file `TLE2KEP.f90` (with gfortran, ifort, etc.) and run the executable to transform the 2 lines element catalog in a table format. The output is a file called `file_oe.fla`.
 
 ```sh
-gfortran TLE2KEP.f90 -o TLE2KEP.x
-./TLE2KEP.x
-```
-
-```
-## 
-## 
-## Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
+gfortran TLE2KEP.f90 -o TLE2KEP
+./TLE2KEP
 ```
 
 ```
@@ -108,14 +102,8 @@ gfortran TLE2KEP.f90 -o TLE2KEP.x
 To process `SATCAT.TXT` we need change the delimiter of the table (missing values are represented by empty strings and not all can be recognised by R). Compile the fortran code `SAT2TABLE.f90` and run the executable. It will also add an header. The output is a file called `satcat.fla`.
 
 ```sh
-gfortran SAT2TABLE.f90 -o SAT2TABLE.x
-./SAT2TABLE.x
-```
-
-```
-## 
-## 
-## Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
+gfortran SAT2TABLE.f90 -o SAT2TABLE
+./SAT2TABLE
 ```
 
 ```
@@ -127,7 +115,7 @@ gfortran SAT2TABLE.f90 -o SAT2TABLE.x
 Read the data assigning the right format and merge the two catalogues (here using R)
 
 ```r
-tlecat <- tbl_df(read.table(file = "file_oe.fla", header = TRUE, dec = "." ))
+tlecat <- tbl_df(read.table(file = "file_oe.fla", header = TRUE, dec = "."))
 tlecat
 ```
 
