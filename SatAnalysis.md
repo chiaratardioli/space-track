@@ -88,6 +88,12 @@ gfortran TLE2KEP.f90 -o TLE2KEP.x
 ```
 
 ```
+## 
+## 
+## Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
+```
+
+```
 ## NORAD_ID       sma_meter            ecc        inc_deg       RAAN_deg       argp_deg          M_deg
 ##        5    8620811.9400     0.18464920    34.24540000    90.73540000    59.24620000   317.70320000
 ##       11    8126935.3566     0.14687900    32.86790000    66.20940000    30.46710000   337.35730000
@@ -104,6 +110,12 @@ To process `SATCAT.TXT` we need change the delimiter of the table (missing value
 ```sh
 gfortran SAT2TABLE.f90 -o SAT2TABLE.x
 ./SAT2TABLE.x
+```
+
+```
+## 
+## 
+## Agreeing to the Xcode/iOS license requires admin privileges, please re-run as root via sudo.
 ```
 
 ```
