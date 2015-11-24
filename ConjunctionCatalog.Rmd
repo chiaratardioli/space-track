@@ -4,12 +4,13 @@ output:
     keep_md: yes
 ---
 
-Satellite Orbit and Decay Analysis
+Orbit Catalog for Conjunction Analysis
 ======================================================
 
 ## Synopsis
 The first list of TLE objects contains all the ones with ratio-cross section greater that 1.0.
 The second list are the ones given by the paper of Rossi et al. on the criticality index (CSI).
+A third list of objects are from Max Vasile (small objects).
 
 ```{r load_library,results="hide",echo=FALSE,message=FALSE}
 library(dplyr)
@@ -44,7 +45,14 @@ Read file `top15`:
 top15 <- tbl_df(read.table(file = "top15", header = TRUE, dec = ".", sep="\t"))
 ```
 
-### Processing Catalog 1
+Read file `Satellite database.xlsx`:
+```{r read-max-datafile}
+smallerlist <- tbl_df(read.table("list_small_objects.txt",header = TRUE))
+nrow(smallerlist)
+```
+
+## Processing data
+
 To process `TLE_LATEST.TXT` into a table containing the Keplerian orbital elements, create a symbolic link or a copy of it and name it `file.fla`.
 ```{r engine='sh',create_link}
 rm -f file.txt
@@ -63,7 +71,6 @@ NUMLIN=$(cat $file_name | wc -l ); # no. of objects
 echo "====================================================================="
 echo "Number of objects: $((NUMLIN-1))";
 ```
-
 
 To process `SATCAT.TXT` we need change the delimiter of the table (missing values are represented by empty strings and not all can be recognised by R). Compile the fortran code `SAT2TABLE.f90` and run the executable. It will also add an header. The output is a file called `satcat.fla`.
 ```{r engine='sh',SAT2TABLE}
@@ -99,34 +106,46 @@ summary(larger)
 larger
 ```
 
+Find the TLE corresponding to the list of objects in the file `list_small_objects.txt`.
+```{r find-TLE}
+smaller <- tbl_df(merge(subcat,smallerlist,by=c("NORAD_ID")))
+smaller <- filter(smaller,RCS<=1)
+nrow(smaller)
+max(smaller$RCS,na.rm=TRUE)
+```
 
-## Plots
+
+No action needs to be done for the list of objects in the file `top15`.
+
+## Plot
 
 ```{r echo=FALSE,fig.height=5,sma_inc}
-cat <- data.frame(cbind(larger$sma_meter*(1-larger$ecc)/1000 - earth_radius,
+bigcat <- data.frame(cbind(larger$sma_meter*(1-larger$ecc)/1000 - earth_radius,
                         larger$sma_meter*(1+larger$ecc)/1000 - earth_radius,
                         larger$inc_deg));
-names(cat) <- c("peri_km","apo_km","inc_deg");
+names(bigcat) <- c("peri_km","apo_km","inc_deg");
+
+smallcat <- data.frame(cbind(smaller$sma_meter*(1-smaller$ecc)/1000 - earth_radius,
+                        smaller$sma_meter*(1+smaller$ecc)/1000 - earth_radius,
+                        smaller$inc_deg));
+names(smallcat) <- c("peri_km","apo_km","inc_deg");
+
 sc <- data.frame(cbind(top15$a_km*(1-top15$ecc) - earth_radius,
                        top15$a_km*(1+top15$ecc) - earth_radius,
                        top15$inc_deg));
 names(sc) <- c("peri_km","apo_km","inc_deg");
 
-with(cat, plot(inc_deg, peri_km, col = "blue", pch = 1))
-with(cat, points(inc_deg, apo_km, col = "red", pch = 1))
+with(bigcat, plot(inc_deg, peri_km, col = "blue", pch = 1))
+with(bigcat, points(inc_deg, apo_km, col = "red", pch = 1))
+with(smallcat, points(inc_deg, peri_km, col = "green", pch = 2))
+with(smallcat, points(inc_deg, apo_km, col = "yellow", pch = 2))
 with(sc, points(inc_deg, peri_km, col = "black", pch = 20))
-
-g <- ggplot( cat, aes( inc_deg, y = value, color = variable))
-g + geom_point( aes(y = peri_km, col="red",alpha=0.5) )  +
-    geom_point( aes(y = apo_km, col="blue",alpha=0.5) ) +
-    labs(x = "inclination [deg]") +
-    labs(y = "pericenter/apocenter altitude [km]")
 ```
 
-## Save processed catalog
+## Save processed catalog top15 + bigger
 
 We finish writing the catalog `top15` and `larger` into a file with the format need by the Conjunction Algorithm.
-```{r writefile}
+```{r writecat1}
 orbits1 <- top15[,2:3]
 names(orbits1) <- c("a_m","ecc")
 orbits1$a_m  <- orbits1$a_m*1000
@@ -144,5 +163,21 @@ orbits2$M    <- larger$M_deg * pi/360
 
 orbit <- rbind(orbits1,orbits2)
 orbit <- cbind("",orbit)
-write.table(orbit, file = "orbit_test.txt", row.name = FALSE, sep = "\t")
+write.table(orbit, file = "top15-larger.txt", row.name = FALSE, sep = "\t")
 ```
+The file `top15-larger.txt` has `r nrow(orbit)` rows.
+
+## Save processed catalog larger + smaller
+```{r writecat2}
+orbits3      <- smaller[,2:3]
+names(orbits3) <- c("a_m","ecc")
+orbits3$inc  <- smaller$inc_deg * pi/360
+orbits3$RAAN <- smaller$RAAN_deg * pi/360
+orbits3$argp <- smaller$argp_deg * pi/360
+orbits3$M    <- smaller$M_deg * pi/360
+
+orbit <- rbind(orbits2,orbits3)
+orbit <- cbind("",orbit)
+write.table(orbit, file = "larger-small.txt", row.name = FALSE, sep = "\t")
+```
+The file `larger-small.txt` has `r nrow(orbit)` rows.

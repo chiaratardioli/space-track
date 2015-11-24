@@ -28,7 +28,7 @@ This folder contains:
 
 ## Download the satellite catalogues
 
-1.  To download the TLE catalog from space-track.org:
+1.  To download the TLE catalog from space-track.org, remove first the file `cookies.txt`, then:
 ```
 ./download_cat_MAC.sh 1      # for MAC users
 ./download_cat_LINUX.sh 1    # for LINUX users
